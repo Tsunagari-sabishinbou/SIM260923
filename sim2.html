@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サラリーマン向け 老後資産・税金・社会保険料 概算シミュレーター</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #cbd5e1;
+            --text: #0f172a;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 8px;
+        }
+        .input-group {
+            margin-bottom: 8px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.78rem;
+            color: #475569;
+            margin-bottom: 2px;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+        .badge {
+            font-size: 0.72rem;
+            color: #ef4444;
+            font-weight: normal;
+        }
+        .badge-info {
+            font-size: 0.72rem;
+            color: #0284c7;
+            font-weight: normal;
+        }
+        .table-container {
+            overflow-x: auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.74rem;
+            text-align: right;
+        }
+        th, td {
+            padding: 7px 5px;
+            border-bottom: 1px solid #e2e8f0;
+            border-right: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+            font-weight: 600;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        tr:hover { background-color: #f1f5f9; }
+        .cash-total-row { font-weight: bold; background-color: #d1fae5 !important; color: #065f46; }
+        .expense-row { font-weight: bold; background-color: #fee2e2 !important; color: #991b1b; }
+        .balance-row { font-weight: bold; background-color: #fef3c7 !important; color: #b45309; }
+        .tax-paid { color: #dc2626; font-weight: 500; }
+        .saving-tax { color: #16a34a; font-weight: 500; }
+        .sub-header { background-color: #e2e8f0; font-size: 0.7rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>サラリーマン向け 老後資産・税金・社会保険料 概算シミュレーター</h1>
+    <div class="grid">
+        <!-- 基本設定・給与所得 -->
+        <div class="card">
+            <h3>基本設定・給与所得</h3>
+            <div class="input-group">
+                <label>現在の年齢</label>
+                <input type="number" id="startAge" value="40" min="18" max="70">
+            </div>
+            <div class="input-group">
+                <label>開始年（西暦）</label>
+                <input type="number" id="startYear" value="2027">
+            </div>
+            <div class="input-group">
+                <label>試算期間（年）</label>
+                <input type="number" id="durationYears" value="40" min="1" max="50">
+            </div>
+            <div class="input-group">
+                <label>定年退職年齢</label>
+                <input type="number" id="retirementAge" value="60" min="50" max="75">
+            </div>
+            <div class="input-group">
+                <label>最終雇用（再雇用等）終了年齢</label>
+                <input type="number" id="finalEmploymentAge" value="65" min="50" max="80">
+            </div>
+            <div class="input-group">
+                <label>初年度の給与収入（年間・万円） <span class="badge">※額面</span></label>
+                <input type="number" id="initSalary" value="650" step="10">
+            </div>
+            <div class="input-group">
+                <label>年間生活費（年間・万円） <span class="badge">※支出</span></label>
+                <input type="number" id="annualLivingExpense" value="300" step="10">
+            </div>
+            <div class="input-group">
+                <label>生活費の年インフレ率（%）</label>
+                <input type="number" id="livingExpenseInflationRate" value="0.0" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>定年までの給与の年増減率（%）</label>
+                <input type="number" id="salaryChangeRate" value="1.0" step="0.5">
+            </div>
+            <div class="input-group">
+                <label>定年延長（再雇用）後の給与の年増減率（%）</label>
+                <input type="number" id="postRetirementSalaryChangeRate" value="-3.0" step="0.5">
+            </div>
+            <div class="input-group">
+                <label>副業収入（年間・万円） <span class="badge-info">※雑所得等</span></label>
+                <input type="number" id="sideBusinessIncome" value="50" step="10">
+            </div>
+            <div class="input-group">
+                <label>特定口座 配当収入（年間・万円） <span class="badge-info">※源泉徴収後手取</span></label>
+                <input type="number" id="dividendIncome" value="24" step="5">
+            </div>
+        </div>
+
+        <!-- 預貯金等設定 -->
+        <div class="card">
+            <h3>預貯金等設定 <span class="badge-info">※単利計算</span></h3>
+            <div class="input-group">
+                <label>現在の預貯金等 初期残高（万円）</label>
+                <input type="number" id="initSavings" value="300" step="50">
+            </div>
+            <div class="input-group">
+                <label>月額積立額（万円）</label>
+                <input type="number" id="savingsMonth" value="5" step="1">
+            </div>
+            <div class="input-group">
+                <label>積立終了年齢</label>
+                <input type="number" id="savingsExitAge" value="65">
+            </div>
+            <div class="input-group">
+                <label>想定年利回り（%）</label>
+                <input type="number" id="savingsRate" value="0.1" step="0.1">
+            </div>
+        </div>
+
+        <!-- 退職金・企業年金 -->
+        <div class="card">
+            <h3>退職金・企業年金</h3>
+            <div class="input-group">
+                <label>退職金支給額（万円） <span class="badge">※額面総額</span></label>
+                <input type="number" id="retirementLumpSum" value="1500" step="50">
+            </div>
+            <div class="input-group">
+                <label>受給年齢</label>
+                <input type="number" id="retirementLumpAge" value="60">
+            </div>
+            <div class="input-group">
+                <label>勤続年数（退職所得控除用）</label>
+                <input type="number" id="serviceYears" value="38" min="1" max="50">
+            </div>
+            <div class="input-group">
+                <label>企業年金（確定給付など・年間・万円）</label>
+                <input type="number" id="corporatePensionAnnual" value="0" step="5">
+            </div>
+            <div class="input-group">
+                <label>企業年金 受給開始〜終了年齢</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="number" id="corpPensionStartAge" value="60">
+                    <span style="font-size:0.8rem; align-self:center;">〜</span>
+                    <input type="number" id="corpPensionEndAge" value="65">
+                </div>
+            </div>
+        </div>
+
+        <!-- 公的年金設定 -->
+        <div class="card">
+            <h3>公的年金・個人年金</h3>
+            <div class="input-group">
+                <label>公的年金受給額（年間・万円） <span class="badge-info">※国民・厚生年金合算</span></label>
+                <input type="number" id="pensionAnnual" value="180" step="10">
+            </div>
+            <div class="input-group">
+                <label>公的年金 受給開始年齢</label>
+                <input type="number" id="pensionStartAge" value="65">
+            </div>
+            <div class="input-group">
+                <label>個人年金受給金額（年間・万円）</label>
+                <input type="number" id="privatePensionAnnual" value="0" step="5">
+            </div>
+            <div class="input-group">
+                <label>個人年金 受給開始年齢 / 期間（年）</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="number" id="privatePensionStartAge" value="65">
+                    <input type="number" id="privatePensionDuration" value="10" min="1" max="30">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>個人年金必要経費割合（%）</label>
+                <input type="number" id="privatePensionCostRate" value="70" min="0" max="100" step="5">
+            </div>
+        </div>
+
+        <!-- 企業型DC設定 -->
+        <div class="card">
+            <h3>企業型DC <span class="badge-info">※加入期間から算定</span></h3>
+            <div class="input-group">
+                <label>初期資産額（円）</label>
+                <input type="number" id="dcInit" value="0" step="10000">
+            </div>
+            <div class="input-group">
+                <label>加入開始年（西暦）</label>
+                <input type="number" id="dcStartYear" value="2005">
+            </div>
+            <div class="input-group">
+                <label>月額掛金総額（円）</label>
+                <input type="number" id="dcMonth" value="32000" step="1000">
+            </div>
+            <div class="input-group">
+                <label>事業主掛金の割合（%）</label>
+                <input type="number" id="dcEmployerRate" value="100" min="0" max="100" step="10">
+            </div>
+            <div class="input-group">
+                <label>掛金拠出終了年齢</label>
+                <input type="number" id="dcContributionEndAge" value="60" min="50" max="65">
+            </div>
+            <div class="input-group">
+                <label>想定年利回り（%）</label>
+                <input type="number" id="dcRate" value="3.0" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>受取方法</label>
+                <select id="dcExitMethod">
+                    <option value="lump">一括受取</option>
+                    <option value="pension">年金受取（分割）</option>
+                    <option value="both" selected>併用（控除残枠内を一時金・残りは年金）</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>受取開始年齢 / 年金受取期間（年）</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="number" id="dcExitAge" value="60">
+                    <input type="number" id="dcPensionDuration" value="10" min="1" max="20">
+                </div>
+            </div>
+        </div>
+
+        <!-- iDeCo設定 -->
+        <div class="card">
+            <h3>iDeCo <span class="badge-info">※加入期間から算定</span></h3>
+            <div class="input-group">
+                <label>加入開始年（西暦）</label>
+                <input type="number" id="idecoStartYear" value="2027">
+            </div>
+            <div class="input-group">
+                <label>初期資産額（円）</label>
+                <input type="number" id="idecoInit" value="0" step="10000">
+            </div>
+            <div class="input-group">
+                <label>月額積立額（円）</label>
+                <input type="number" id="idecoMonth" value="30000" step="1000">
+            </div>
+            <div class="input-group">
+                <label>掛金拠出終了年齢</label>
+                <input type="number" id="idecoContributionEndAge" value="65" min="60" max="65">
+            </div>
+            <div class="input-group">
+                <label>想定年利回り（%）</label>
+                <input type="number" id="idecoRate" value="3.0" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>受取方法</label>
+                <select id="idecoExitMethod">
+                    <option value="lump">一括受取</option>
+                    <option value="pension">年金受取（分割）</option>
+                    <option value="both" selected>併用（控除残枠内を一時金・残りは年金）</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>受取開始年齢 / 年金受取期間（年）</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="number" id="idecoExitAge" value="60">
+                    <input type="number" id="idecoPensionDuration" value="10" min="1" max="20">
+                </div>
+            </div>
+        </div>
+
+        <!-- NISA設定 -->
+        <div class="card">
+            <h3>NISA <span class="badge">※定額/定率対応</span></h3>
+            <div class="input-group">
+                <label>シミュレーション開始時の評価額（円）</label>
+                <input type="number" id="nisaInit" value="0" step="10000">
+            </div>
+            <div class="input-group">
+                <label>そのうち累計投資元本（円）</label>
+                <input type="number" id="nisaInitialPrincipal" value="0" step="10000">
+            </div>
+            <div class="input-group">
+                <label>月額積立額（円）</label>
+                <input type="number" id="nisaMonth" value="50000" step="1000">
+            </div>
+            <div class="input-group">
+                <label>積立終了年齢</label>
+                <input type="number" id="nisaExitAge" value="65">
+            </div>
+            <div class="input-group">
+                <label>想定年利回り（%）</label>
+                <input type="number" id="nisaRate" value="3.0" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>NISA口座 配当受取（年間・万円）</label>
+                <input type="number" id="nisaDividendAnnual" value="20" step="5">
+            </div>
+            <div class="input-group">
+                <label>取り崩し方法</label>
+                <select id="nisaWithdrawType">
+                    <option value="amount">定額（万円）</option>
+                    <option value="rate">定率（%）</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>取り崩し開始年齢 / 額（万円 or %）</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="number" id="nisaWithdrawStartAge" value="65">
+                    <input type="number" id="nisaWithdrawValue" value="120" step="10">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 資産推移・内訳テーブル -->
+    <div class="table-container">
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th rowspan="2">西暦</th>
+                    <th rowspan="2">年齢</th>
+                    <th colspan="8">手元現金収入内訳（年間概算）</th>
+                    <th rowspan="2" class="cash-total-row">手元現金<br>総額</th>
+                    <th rowspan="2" class="expense-row">年間生活費<br>(支出)</th>
+                    <th rowspan="2" class="balance-row">年間収支</th>
+                    <th colspan="5">資産残高</th>
+                    <th rowspan="2">所得税・住民税<br>(源泉・申告分離)</th>
+                    <th rowspan="2">社会保険料<br>(国保・介護等)</th>
+                    <th rowspan="2">DC/iDeCo<br>年間節税額</th>
+                </tr>
+                <tr class="sub-header">
+                    <th>給与収入<br>(手取概算)</th>
+                    <th>副業収入<br>(雑所得等)</th>
+                    <th>特定口座配当<br>(手取額)</th>
+                    <th>NISA配当<br>(非課税)</th>
+                    <th>公的・企業年金</th>
+                    <th>個人・年金</th>
+                    <th>退職金・一時金<br>(税引後手取)</th>
+                    <th>NISA取り崩し<br>(非課税)</th>
+                    <th>預貯金等残高</th>
+                    <th>企業型DC残高</th>
+                    <th>iDeCo残高</th>
+                    <th>NISA残高</th>
+                    <th>総資産額</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function fmt(num) {
+        if (!isFinite(num)) return "¥ 0";
+        const rounded = Math.round(num);
+        if (rounded < 0) return "−¥ " + Math.abs(rounded).toLocaleString();
+        return "¥ " + rounded.toLocaleString();
+    }
+
+    function calcProgressiveIncomeTax(taxableIncome) {
+        let tax = 0;
+        if (taxableIncome <= 1950000) tax = taxableIncome * 0.05;
+        else if (taxableIncome <= 3300000) tax = taxableIncome * 0.10 - 97500;
+        else if (taxableIncome <= 6950000) tax = taxableIncome * 0.20 - 427500;
+        else if (taxableIncome <= 9000000) tax = taxableIncome * 0.23 - 636000;
+        else if (taxableIncome <= 18000000) tax = taxableIncome * 0.33 - 1536000;
+        else if (taxableIncome <= 40000000) tax = taxableIncome * 0.40 - 2796000;
+        else tax = taxableIncome * 0.45 - 4796000;
+        return Math.max(0, tax) * 1.021;
+    }
+
+    function getMarginalIncomeTaxRate(taxableIncome) {
+        if (taxableIncome <= 1950000) return 0.05;
+        if (taxableIncome <= 3300000) return 0.10;
+        if (taxableIncome <= 6950000) return 0.20;
+        if (taxableIncome <= 9000000) return 0.23;
+        if (taxableIncome <= 18000000) return 0.33;
+        if (taxableIncome <= 40000000) return 0.40;
+        return 0.45;
+    }
+
+    function calcEmploymentIncomeDeduction(salary) {
+        if (salary <= 550000) return salary;
+        if (salary <= 1625000) return 550000;
+        if (salary <= 1800000) return salary * 0.4 - 100000;
+        if (salary <= 3600000) return salary * 0.3 - 80000;
+        if (salary <= 6600000) return salary * 0.2 + 440000;
+        if (salary <= 8500000) return salary * 0.1 + 1100000;
+        return 1950000;
+    }
+
+    function getPensionTaxableIncome(pensionAmount, age) {
+        if (pensionAmount <= 0) return 0;
+        if (age < 65) {
+            if (pensionAmount <= 600000) return 0;
+            if (pensionAmount <= 1300000) return pensionAmount - 600000;
+            if (pensionAmount <= 4100000) return pensionAmount * 0.75 - 275000;
+            if (pensionAmount <= 7700000) return pensionAmount * 0.85 - 685000;
+            return pensionAmount * 0.95 - 1455000;
+        } else {
+            if (pensionAmount <= 1100000) return 0;
+            if (pensionAmount <= 3300000) return pensionAmount - 1100000;
+            if (pensionAmount <= 4100000) return pensionAmount * 0.75 - 275000;
+            if (pensionAmount <= 7700000) return pensionAmount * 0.85 - 685000;
+            return pensionAmount * 0.95 - 1455000;
+        }
+    }
+
+    // 退職所得控除の基本額
+    // 国税庁：20年以下=40万円×勤続年数（最低80万円）、20年超=800万円+70万円×(勤続年数-20)
+    // ここでは「基本控除額」と「過去の退職手当との重複調整後の控除額」を完全に分離する。
+    function calcRetirementDeduction(years) {
+        const y = Math.max(0, Math.ceil(Number(years) || 0));
+        if (y <= 20) return Math.max(800000, 400000 * y);
+        return 8000000 + 700000 * (y - 20);
+    }
+
+    // 前の退職手当の金額が、その勤続年数に対応する控除額に満たない場合に使う期間。
+    // 国税庁の「収入金額に応じた勤続期間」の算式を年単位で切捨てる。
+    function getEffectivePriorYears(amount, years) {
+        const y = Math.max(0, Math.ceil(Number(years) || 0));
+        const a = Math.max(0, Number(amount) || 0);
+        const fullDed = calcRetirementDeduction(y);
+        if (a >= fullDed) return y;
+        if (a <= 8000000) return Math.max(0, Math.floor(a / 400000));
+        return Math.max(0, Math.floor((a - 8000000) / 700000 + 20));
+    }
+
+    function intervalFromEvent(event, effectiveYears) {
+        const end = Number(event.year);
+        const y = Math.max(0, Number(effectiveYears) || 0);
+        return { start: end - y, end: end };
+    }
+
+    function mergeIntervals(intervals) {
+        const xs = intervals
+            .filter(x => x && x.end > x.start)
+            .sort((a,b) => a.start - b.start || a.end - b.end);
+        const out = [];
+        for (const x of xs) {
+            if (!out.length || x.start > out[out.length - 1].end) {
+                out.push({start:x.start, end:x.end});
+            } else {
+                out[out.length - 1].end = Math.max(out[out.length - 1].end, x.end);
+            }
+        }
+        return out;
+    }
+
+    function overlapYears(currentEvent, priorEvents, windowYears) {
+        const c = intervalFromEvent(currentEvent, currentEvent.years);
+        const cutoff = currentEvent.year - windowYears;
+        const intervals = [];
+        for (const p of priorEvents) {
+            if (p.year >= currentEvent.year) continue;
+            if (p.year < cutoff) continue;
+            const py = getEffectivePriorYears(p.amount, p.years);
+            const pi = intervalFromEvent(p, py);
+            const st = Math.max(c.start, pi.start);
+            const en = Math.min(c.end, pi.end);
+            if (en > st) intervals.push({start:st, end:en});
+        }
+        const merged = mergeIntervals(intervals);
+        return merged.reduce((sum,x) => sum + Math.floor(x.end - x.start), 0);
+    }
+
+    // 現行制度の受取順序に応じて、4年・9年・19年の対象を判定する。
+    function getPriorWindowYears(currentEvent, priorEvents) {
+        const isDcCurrent = currentEvent.kind === 'dc' || currentEvent.kind === 'ideco';
+        if (isDcCurrent) return 19;
+
+        const hasPost2026DcWithin9 = priorEvents.some(p =>
+            (p.kind === 'dc' || p.kind === 'ideco') &&
+            p.year >= 2026 && p.year < currentEvent.year &&
+            currentEvent.year - p.year <= 9
+        );
+        return hasPost2026DcWithin9 ? 9 : 4;
+    }
+
+    function calcAdjustedRetirementDeduction(currentEvent, priorEvents) {
+        const basic = calcRetirementDeduction(currentEvent.years);
+        const windowYears = getPriorWindowYears(currentEvent, priorEvents);
+        const overlap = overlapYears(currentEvent, priorEvents, windowYears);
+        const overlapDeduction = calcRetirementDeduction(overlap);
+        return {
+            basicDeduction: basic,
+            overlapYears: overlap,
+            overlapDeduction: Math.min(basic, overlapDeduction),
+            adjustedDeduction: Math.max(0, basic - Math.min(basic, overlapDeduction)),
+            windowYears
+        };
+    }
+
+    // 単独の退職金の税額。複数の退職手当が同一年にある場合は下の年単位計算を使用する。
+    function calcSingleRetirementTax(amount, years) {
+        const deduction = calcRetirementDeduction(years);
+        const taxable = Math.max(0, (amount - deduction) / 2);
+        const incomeTax = calcProgressiveIncomeTax(taxable);
+        const residentTax = taxable * 0.10;
+        return incomeTax + residentTax;
+    }
+
+    function calculate() {
+        const startAge = parseInt(document.getElementById('startAge').value) || 40;
+        const startYear = parseInt(document.getElementById('startYear').value) || 2027;
+        const durationYears = parseInt(document.getElementById('durationYears').value) || 40;
+        const retirementAge = parseInt(document.getElementById('retirementAge').value) || 60;
+        const finalEmploymentAge = parseInt(document.getElementById('finalEmploymentAge').value) || 65;
+        const initSalary = (parseFloat(document.getElementById('initSalary').value) || 0) * 10000;
+        const baseLivingExpense = (parseFloat(document.getElementById('annualLivingExpense').value) || 0) * 10000;
+        const livingExpenseInflationRate = (parseFloat(document.getElementById('livingExpenseInflationRate').value) || 0) / 100;
+        const salaryChangeRate = (parseFloat(document.getElementById('salaryChangeRate').value) || 0) / 100;
+        const postRetirementSalaryChangeRate = (parseFloat(document.getElementById('postRetirementSalaryChangeRate').value) || 0) / 100;
+        const sideBusinessIncome = (parseFloat(document.getElementById('sideBusinessIncome').value) || 0) * 10000;
+        const dividendNetCash = (parseFloat(document.getElementById('dividendIncome').value) || 0) * 10000;
+                
+        const initSavings = (parseFloat(document.getElementById('initSavings').value) || 0) * 10000;
+        let savingsPrincipal = initSavings;
+        let savingsInterestAccumulated = 0;
+        const savingsMonth = (parseFloat(document.getElementById('savingsMonth').value) || 0) * 10000;
+        const savingsExitAge = parseInt(document.getElementById('savingsExitAge').value) || 65;
+        const savingsAnnualRate = (parseFloat(document.getElementById('savingsRate').value) || 0) / 100;
+        const savingsMonthlyRate = savingsAnnualRate / 12;
+
+        const retirementLumpSum = (parseFloat(document.getElementById('retirementLumpSum').value) || 0) * 10000;
+        const retirementLumpAge = parseInt(document.getElementById('retirementLumpAge').value) || 60;
+        const serviceYears = parseInt(document.getElementById('serviceYears').value) || 38;
+        const corporatePensionAnnual = (parseFloat(document.getElementById('corporatePensionAnnual').value) || 0) * 10000;
+        const corpPensionStartAge = parseInt(document.getElementById('corpPensionStartAge').value) || 60;
+        const corpPensionEndAge = parseInt(document.getElementById('corpPensionEndAge').value) || 65;
+
+        const pensionAnnual = (parseFloat(document.getElementById('pensionAnnual').value) || 0) * 10000;
+        const pensionStartAge = parseInt(document.getElementById('pensionStartAge').value) || 65;
+        const privatePensionAnnual = (parseFloat(document.getElementById('privatePensionAnnual').value) || 0) * 10000;
+        const privatePensionStartAge = parseInt(document.getElementById('privatePensionStartAge').value) || 65;
+        const privatePensionDuration = parseInt(document.getElementById('privatePensionDuration').value) || 10;
+        const privatePensionCostRate = (parseFloat(document.getElementById('privatePensionCostRate').value) || 0) / 100;
+
+        let dcBal = parseFloat(document.getElementById('dcInit').value) || 0;
+        const dcStartYear = parseInt(document.getElementById('dcStartYear').value) || 2005;
+        const dcTotalMonth = parseFloat(document.getElementById('dcMonth').value) || 0;
+        const dcEmployerRate = (parseFloat(document.getElementById('dcEmployerRate').value) || 100) / 100;
+        const dcMatchingMonth = dcTotalMonth * (1 - dcEmployerRate);
+        const dcContributionEndAge = parseInt(document.getElementById('dcContributionEndAge').value) || 60;
+        const dcRate = (parseFloat(document.getElementById('dcRate').value) || 0) / 100 / 12;
+        const dcExitMethod = document.getElementById('dcExitMethod').value;
+        const dcExitAge = parseInt(document.getElementById('dcExitAge').value) || 60;
+        const dcPensionDuration = parseInt(document.getElementById('dcPensionDuration').value) || 10;
+
+        let idecoBal = parseFloat(document.getElementById('idecoInit').value) || 0;
+        const idecoStartYear = parseInt(document.getElementById('idecoStartYear').value) || startYear;
+        const idecoMonth = parseFloat(document.getElementById('idecoMonth').value) || 0;
+        const idecoContributionEndAge = parseInt(document.getElementById('idecoContributionEndAge').value) || 65;
+        const idecoRate = (parseFloat(document.getElementById('idecoRate').value) || 0) / 100 / 12;
+        const idecoExitMethod = document.getElementById('idecoExitMethod').value;
+        const idecoExitAge = parseInt(document.getElementById('idecoExitAge').value) || 60;
+        const idecoPensionDuration = parseInt(document.getElementById('idecoPensionDuration').value) || 10;
+
+        let nisaBal = parseFloat(document.getElementById('nisaInit').value) || 0;
+        let nisaPrin = parseFloat(document.getElementById('nisaInitialPrincipal').value) || 0;
+        const nisaMonth = parseFloat(document.getElementById('nisaMonth').value) || 0;
+        const nisaRate = (parseFloat(document.getElementById('nisaRate').value) || 0) / 100 / 12;
+        const nisaExitAge = parseInt(document.getElementById('nisaExitAge').value) || 65;
+        const nisaDividendAnnual = (parseFloat(document.getElementById('nisaDividendAnnual').value) || 0) * 10000;
+        const nisaWithdrawType = document.getElementById('nisaWithdrawType').value;
+        const nisaWithdrawStartAge = parseInt(document.getElementById('nisaWithdrawStartAge').value) || 65;
+        const nisaWithdrawValue = parseFloat(document.getElementById('nisaWithdrawValue').value) || 0;
+
+        // 各DC等の加入期間
+        const getDcYears = (exitAge) => {
+            const exitYear = startYear + (exitAge - startAge);
+            return Math.max(1, exitYear - dcStartYear + 1);
+        };
+        const getIdecoYears = (exitAge) => {
+            const exitYear = startYear + (exitAge - startAge);
+            return Math.max(1, exitYear - idecoStartYear + 1);
+        };
+
+        let tempDcBalForReal = dcBal;
+        let tempIdecoBalForReal = idecoBal;
+        for (let y = 0; y < durationYears; y++) {
+            const a = startAge + y;
+            for (let m = 0; m < 12; m++) {
+                if (a < dcExitAge && a <= dcContributionEndAge) tempDcBalForReal += dcTotalMonth;
+                if (a < dcExitAge) tempDcBalForReal *= (1 + dcRate);
+                if (a < idecoExitAge && a <= idecoContributionEndAge) tempIdecoBalForReal += idecoMonth;
+                if (a < idecoExitAge) tempIdecoBalForReal *= (1 + idecoRate);
+            }
+        }
+
+        // 退職所得のイベントを年単位で整理する。
+        // 「基本控除額」と「重複調整後控除額」を別管理し、同一年は共通控除枠を1つだけ使う。
+        const companyYear = startYear + (retirementLumpAge - startAge);
+        const dcYear = startYear + (dcExitAge - startAge);
+        const idecoYear = startYear + (idecoExitAge - startAge);
+
+        const retirementEvents = [];
+        if (retirementLumpSum > 0) {
+            retirementEvents.push({
+                kind: 'company', year: companyYear, age: retirementLumpAge,
+                amount: retirementLumpSum, years: serviceYears, method: 'lump'
+            });
+        }
+        if (tempDcBalForReal > 0 && dcExitMethod !== 'pension') {
+            retirementEvents.push({
+                kind: 'dc', year: dcYear, age: dcExitAge,
+                amount: tempDcBalForReal, years: getDcYears(dcExitAge), method: dcExitMethod
+            });
+        }
+        if (tempIdecoBalForReal > 0 && idecoExitMethod !== 'pension') {
+            retirementEvents.push({
+                kind: 'ideco', year: idecoYear, age: idecoExitAge,
+                amount: tempIdecoBalForReal, years: getIdecoYears(idecoExitAge), method: idecoExitMethod
+            });
+        }
+
+        // 同一年の退職手当等は、勤続期間の重複を除いた共通の控除枠を1つだけ計算する。
+        const deductionUsedByYear = {};
+        const adjustedDeductionByYear = {};
+        const retirementDetailByYear = {};
+        const yearGroups = {};
+        for (const e of retirementEvents) {
+            (yearGroups[e.year] ||= []).push(e);
+        }
+
+        for (const [yearKey, events] of Object.entries(yearGroups)) {
+            const year = Number(yearKey);
+            const intervals = events.map(e => intervalFromEvent(e, e.years));
+            const merged = mergeIntervals(intervals);
+            const commonYears = merged.reduce((sum,x) => sum + Math.floor(x.end - x.start), 0);
+            const priorEvents = retirementEvents.filter(e => e.year < year);
+            let baseDeduction = calcRetirementDeduction(commonYears);
+
+            // 基本控除額は calcRetirementDeduction(commonYears) で確定させ、
+            // ここから先だけを「過去の退職手当との重複調整」として独立して処理する。
+            // 同一年に複数イベントがある場合は、各イベントについて適用される
+            // 4年・9年・19年の対象期間を作り、それらの重複区間を合併してから
+            // 1回だけ控除額を差し引く。これにより「最大の重複年数だけを採用する」
+            // 旧ロジックによる過小・過大調整を避ける。
+            const overlapIntervals = [];
+            const windowSet = new Set();
+            for (const e of events) {
+                const c = intervalFromEvent(e, e.years);
+                const isDcCurrent = e.kind === 'dc' || e.kind === 'ideco';
+                const windowYearsForEvent = isDcCurrent ? 19 :
+                    (priorEvents.some(p =>
+                        (p.kind === 'dc' || p.kind === 'ideco') &&
+                        p.year >= 2026 && p.year < e.year &&
+                        e.year - p.year <= 9
+                    ) ? 9 : 4);
+                windowSet.add(windowYearsForEvent);
+                const cutoff = e.year - windowYearsForEvent;
+
+                for (const prior of priorEvents) {
+                    if (prior.year < cutoff || prior.year >= e.year) continue;
+                    const priorYears = getEffectivePriorYears(prior.amount, prior.years);
+                    const pi = intervalFromEvent(prior, priorYears);
+                    const start = Math.max(c.start, pi.start);
+                    const end = Math.min(c.end, pi.end);
+                    if (end > start) overlapIntervals.push({start, end});
+                }
+            }
+            const mergedOverlap = mergeIntervals(overlapIntervals);
+            const overlapYears = mergedOverlap.reduce((sum, x) => sum + Math.floor(x.end - x.start), 0);
+            // 重複期間が0年なら、最低80万円の基本控除を差し引いてはいけない。
+            // calcRetirementDeduction(0) は単独の退職金の最低控除として80万円を返すため、
+            // 重複調整では0年を明示的に0円として扱う。
+            const overlapDeduction = overlapYears > 0 ? calcRetirementDeduction(overlapYears) : 0;
+            const adjustedCommonDeduction = Math.max(0, baseDeduction - Math.min(baseDeduction, overlapDeduction));
+            adjustedDeductionByYear[year] = adjustedCommonDeduction;
+            const windowYears = windowSet.size === 0 ? 0 : Math.max(...windowSet);
+
+            // 一括受取を先に控除枠へ充当し、その残額を「併用」の一時金へ充当。
+            let remaining = adjustedCommonDeduction;
+            const details = [];
+            for (const e of events) {
+                let lump = 0;
+                if (e.method === 'lump') lump = e.amount;
+                else if (e.method === 'both') lump = Math.min(e.amount, remaining);
+                const within = Math.min(lump, remaining);
+                const excess = Math.max(0, lump - within);
+                remaining = Math.max(0, remaining - within);
+                details.push({event:e, lump, within, excess});
+            }
+            deductionUsedByYear[year] = adjustedCommonDeduction - remaining;
+            retirementDetailByYear[year] = {
+                basicDeduction: baseDeduction,
+                adjustedDeduction: adjustedCommonDeduction,
+                remainingDeduction: remaining,
+                overlapYears,
+                windowYears,
+                details
+            };
+        }
+
+        let dcLumpAmounts = {};
+        let idecoLumpAmounts = {};
+        for (const [yearKey, detail] of Object.entries(retirementDetailByYear)) {
+            for (const d of detail.details) {
+                if (d.event.kind === 'dc') dcLumpAmounts[d.event.age] = d.lump;
+                if (d.event.kind === 'ideco') idecoLumpAmounts[d.event.age] = d.lump;
+            }
+        }
+
+        let dcPensionSchedules = {};
+        let idecoPensionSchedules = {};
+        {
+            let tDc = dcBal, tIdeco = idecoBal;
+            for (let y = 0; y < durationYears; y++) {
+                const a = startAge + y;
+                for (let m = 0; m < 12; m++) {
+                    if (a < dcExitAge && a <= dcContributionEndAge) tDc += dcTotalMonth;
+                    if (a < dcExitAge) tDc *= (1 + dcRate);
+                    if (a < idecoExitAge && a <= idecoContributionEndAge) tIdeco += idecoMonth;
+                    if (a < idecoExitAge) tIdeco *= (1 + idecoRate);
+                }
+                if (a === dcExitAge && tDc > 0) {
+                    let lumpAmt = dcLumpAmounts[a] !== undefined ? dcLumpAmounts[a] : 0;
+                    let rem = tDc - lumpAmt;
+                    if (rem > 0 && (dcExitMethod === 'pension' || dcExitMethod === 'both')) {
+                        let ap = rem / dcPensionDuration;
+                        for (let d = 0; d < dcPensionDuration; d++) dcPensionSchedules[a + d] = ap;
+                    }
+                    tDc = 0;
+                }
+                if (a === idecoExitAge && tIdeco > 0) {
+                    let lumpAmt = idecoLumpAmounts[a] !== undefined ? idecoLumpAmounts[a] : 0;
+                    let rem = tIdeco - lumpAmt;
+                    if (rem > 0 && (idecoExitMethod === 'pension' || idecoExitMethod === 'both')) {
+                        let ap = rem / idecoPensionDuration;
+                        for (let d = 0; d < idecoPensionDuration; d++) idecoPensionSchedules[a + d] = ap;
+                    }
+                    tIdeco = 0;
+                }
+            }
+        }
+
+        let currentSalary = initSalary;
+        let prevDeclaredIncomeForHealth = 0;
+
+        const tbody = document.querySelector('#resultTable tbody');
+        tbody.innerHTML = '';
+
+        for (let y = 0; y < durationYears; y++) {
+            const currentYear = startYear + y;
+            const currentAge = startAge + y;
+
+            if (currentAge > finalEmploymentAge) {
+                currentSalary = 0;
+            } else if (y > 0) {
+                if (currentAge <= retirementAge) {
+                    currentSalary *= (1 + salaryChangeRate);
+                } else {
+                    currentSalary *= (1 + postRetirementSalaryChangeRate);
+                }
+            }
+
+            const currentLivingExpense = baseLivingExpense * Math.pow(1 + livingExpenseInflationRate, y);
+
+            let yearlyIdecoPaid = 0;
+            let yearlyDcMatchingPaid = 0;
+            if (currentAge < dcExitAge && currentAge <= dcContributionEndAge && dcMatchingMonth > 0) {
+                yearlyDcMatchingPaid = dcMatchingMonth * 12;
+            }
+            if (currentAge < idecoExitAge && currentAge <= idecoContributionEndAge && idecoMonth > 0) {
+                yearlyIdecoPaid = idecoMonth * 12;
+            }
+
+            const employmentDeduction = calcEmploymentIncomeDeduction(currentSalary);
+            const earnedIncome = Math.max(0, currentSalary - employmentDeduction);
+            const sideIncome = sideBusinessIncome;
+            
+            const totalDeductiblePension = yearlyIdecoPaid + yearlyDcMatchingPaid;
+            const tempTaxableForMarginal = Math.max(0, earnedIncome + sideIncome - 480000);
+            const marginalRate = getMarginalIncomeTaxRate(tempTaxableForMarginal);
+            const dcIdecoTaxSaving = totalDeductiblePension * (marginalRate + 0.10);
+
+            let pubPension = (currentAge >= pensionStartAge) ? pensionAnnual : 0;
+            let corpPension = (currentAge >= corpPensionStartAge && currentAge < corpPensionEndAge) ? corporatePensionAnnual : 0;
+            let totalPublicAndCorpPension = pubPension + corpPension;
+            let taxablePubPension = getPensionTaxableIncome(totalPublicAndCorpPension, currentAge);
+
+            let privPensionNet = 0;
+            let taxablePrivPension = 0;
+            if (currentAge >= privatePensionStartAge && currentAge < privatePensionStartAge + privatePensionDuration) {
+                privPensionNet = privatePensionAnnual;
+                taxablePrivPension = Math.max(0, privatePensionAnnual * (1 - privatePensionCostRate));
+            }
+
+            let dcIdecoPensionIncome = 0;
+            if (dcPensionSchedules[currentAge]) dcIdecoPensionIncome += dcPensionSchedules[currentAge];
+            if (idecoPensionSchedules[currentAge]) dcIdecoPensionIncome += idecoPensionSchedules[currentAge];
+            let taxableDcIdecoPension = getPensionTaxableIncome(dcIdecoPensionIncome, currentAge);
+
+            let socialInsurance = 0;
+            if (currentSalary > 0) {
+                socialInsurance = currentSalary * 0.15;
+            } else if (currentAge < 75) {
+                let baseIncomeForHealth = Math.max(0, prevDeclaredIncomeForHealth - 430000);
+                socialInsurance = Math.min(960000, Math.max(50000, baseIncomeForHealth * 0.10));
+            } else {
+                let baseIncomeForHealth = Math.max(0, prevDeclaredIncomeForHealth - 430000);
+                socialInsurance = Math.min(800000, Math.max(50000, baseIncomeForHealth * 0.08));
+            }
+
+            const totalIncomeBeforeDed = earnedIncome + sideIncome + taxablePubPension + taxablePrivPension + taxableDcIdecoPension;
+            const incomeDeductions = totalDeductiblePension + 480000;
+            const taxableIncomeTax = Math.max(0, totalIncomeBeforeDed - incomeDeductions);
+            const taxableResident = Math.max(0, totalIncomeBeforeDed - incomeDeductions - 50000);
+            
+            const incomeTax = calcProgressiveIncomeTax(taxableIncomeTax);
+            const residentTax = taxableResident * 0.10 + (totalIncomeBeforeDed > 0 ? 5000 : 0);
+            const generalTaxes = incomeTax + Math.max(0, residentTax);
+
+            const netSalary = Math.max(0, currentSalary - socialInsurance - generalTaxes);
+
+            let lumpNetThisYear = 0;
+            let lumpTaxOnlyThisYear = 0;
+
+            // 同一年の退職手当等は合算して、共通の退職所得控除を1回だけ適用する。
+            const retirementYear = startYear + (currentAge - startAge);
+            const yearDetail = retirementDetailByYear[retirementYear];
+            if (yearDetail) {
+                let totalLump = 0;
+                for (const d of yearDetail.details) totalLump += d.lump;
+                const taxableRetirementIncome = Math.max(0, (totalLump - yearDetail.adjustedDeduction) / 2);
+                const tax = calcProgressiveIncomeTax(taxableRetirementIncome) + taxableRetirementIncome * 0.10;
+                lumpTaxOnlyThisYear = tax;
+                lumpNetThisYear = Math.max(0, totalLump - tax);
+            }
+
+            // 預貯金積立は新たな収入ではなく、手元現金から預貯金へ資金移動するもの。
+            // 預貯金残高には加算するが、年間収支から同額を控除して二重計上を防ぐ。
+            const yearlySavingsContribution =
+                (currentAge <= savingsExitAge && savingsMonth > 0) ? savingsMonth * 12 : 0;
+            if (yearlySavingsContribution > 0) {
+                savingsPrincipal += yearlySavingsContribution;
+            }
+            for (let m = 0; m < 12; m++) {
+                let monthlyInterest = (savingsPrincipal + savingsInterestAccumulated) * savingsMonthlyRate;
+                savingsInterestAccumulated += monthlyInterest;
+            }
+            let totalSavingsBal = savingsPrincipal + savingsInterestAccumulated;
+
+            if (currentAge < dcExitAge) {
+                for (let m = 0; m < 12; m++) {
+                    if (currentAge <= dcContributionEndAge) dcBal += dcTotalMonth;
+                    dcBal *= (1 + dcRate);
+                }
+                if (currentAge === dcExitAge) dcBal = 0;
+            } else {
+                dcBal = 0;
+            }
+
+            if (currentAge < idecoExitAge) {
+                for (let m = 0; m < 12; m++) {
+                    if (currentAge <= idecoContributionEndAge) idecoBal += idecoMonth;
+                    idecoBal *= (1 + idecoRate);
+                }
+                if (currentAge === idecoExitAge) idecoBal = 0;
+            } else {
+                idecoBal = 0;
+            }
+
+            let nisaWithdrawn = 0;
+            if (currentAge <= nisaExitAge && nisaMonth > 0) {
+                for (let m = 0; m < 12; m++) {
+                    nisaBal += nisaMonth;
+                    nisaPrin += nisaMonth;
+                    nisaBal *= (1 + nisaRate);
+                }
+            } else {
+                nisaBal *= Math.pow(1 + nisaRate, 12);
+            }
+
+            if (currentAge >= nisaWithdrawStartAge && nisaBal > 0) {
+                if (nisaWithdrawType === 'amount') {
+                    nisaWithdrawn = Math.min(nisaBal, nisaWithdrawValue * 10000);
+                } else {
+                    nisaWithdrawn = nisaBal * (nisaWithdrawValue / 100);
+                }
+                nisaBal -= nisaWithdrawn;
+            }
+
+            // 給与終了後（年金受給期）は、給与所得時との整合性を取るため、
+            // 手元現金に入れる通常収入を税金・社会保険料控除後で計上する。
+            // 給与がある年は既存のnetSalary計算を維持し、他の部分は変更しない。
+            const pensionGrossCash = totalPublicAndCorpPension + privPensionNet + dcIdecoPensionIncome;
+            const pensionAfterTaxHealthCash = Math.max(0,
+                sideIncome + pensionGrossCash + dividendNetCash + nisaDividendAnnual
+                - generalTaxes - socialInsurance
+            );
+            const totalCashIn = currentSalary <= 0
+                ? pensionAfterTaxHealthCash + lumpNetThisYear + nisaWithdrawn
+                : netSalary + sideIncome + dividendNetCash + nisaDividendAnnual + pensionGrossCash + lumpNetThisYear + nisaWithdrawn;
+
+            // 年間収支は「手元現金収入」から生活費と、手元現金から資産へ移す拠出額を差し引く。
+            // 預貯金積立は収入ではないため、預貯金残高へ加算した分を年間収支から控除する。
+            // iDeCo・DCマッチング・NISA積立も同様に手元現金からの資金移動なので控除する。
+            const yearlyNisaContribution =
+                (currentAge <= nisaExitAge && nisaMonth > 0) ? nisaMonth * 12 : 0;
+
+            const annualBalance =
+                totalCashIn
+                - currentLivingExpense
+                - yearlySavingsContribution
+                - yearlyIdecoPaid
+                - yearlyDcMatchingPaid
+                - yearlyNisaContribution;
+
+            totalSavingsBal += annualBalance;
+            savingsPrincipal += annualBalance;
+
+            const totalAssets = Math.max(0, totalSavingsBal) + dcBal + idecoBal + nisaBal;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${currentYear}</td>
+                <td>${currentAge}</td>
+                <td>${fmt(netSalary)}</td>
+                <td>${fmt(sideIncome)}</td>
+                <td>${fmt(dividendNetCash)}</td>
+                <td>${fmt(nisaDividendAnnual)}</td>
+                <td>${fmt(totalPublicAndCorpPension)}</td>
+                <td>${fmt(privPensionNet + dcIdecoPensionIncome)}</td>
+                <td>${fmt(lumpNetThisYear)}</td>
+                <td>${fmt(nisaWithdrawn)}</td>
+                <td class="cash-total-row">${fmt(totalCashIn)}</td>
+                <td class="expense-row">${fmt(currentLivingExpense)}</td>
+                <td class="balance-row">${fmt(annualBalance)}</td>
+                <td>${fmt(totalSavingsBal)}</td>
+                <td>${fmt(dcBal)}</td>
+                <td>${fmt(idecoBal)}</td>
+                <td>${fmt(nisaBal)}</td>
+                <td style="font-weight:bold;">${fmt(totalAssets)}</td>
+                <td class="tax-paid">${fmt(generalTaxes + lumpTaxOnlyThisYear)}</td>
+                <td>${fmt(socialInsurance)}</td>
+                <td class="saving-tax">${fmt(dcIdecoTaxSaving)}</td>
+            `;
+            tbody.appendChild(tr);
+
+            prevDeclaredIncomeForHealth = earnedIncome + sideIncome + taxablePubPension + taxablePrivPension + taxableDcIdecoPension;
+        }
+    }
+
+    function initializeSimulator() {
+        document.querySelectorAll('input, select').forEach(el => {
+            el.removeEventListener('input', calculate);
+            el.removeEventListener('change', calculate);
+            el.addEventListener('input', calculate);
+            el.addEventListener('change', calculate);
+        });
+
+        try {
+            calculate();
+        } catch (error) {
+            console.error('シミュレーション計算エラー:', error);
+            const tbody = document.querySelector('#resultTable tbody');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="21" style="text-align:left;color:#b91c1c;font-weight:bold;">計算中にエラーが発生しました。<br>' +
+                    String(error && error.message ? error.message : error) +
+                    '</td></tr>';
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeSimulator, { once: true });
+    } else {
+        initializeSimulator();
+    }
+</script>
+</body>
+</html>
